@@ -3,8 +3,6 @@ import ImagesApiService from './js/img-service';
 import Notiflix from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
-import './css/common.css';
-import './css/gallery.css';
 
 //===== Инициализация SimpleLightbox =====
 let lightbox = new SimpleLightbox('.gallery a', {
@@ -71,9 +69,9 @@ async function fetchHits() {
         return Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
       }
       //  Рэндэрим  полученные изображения
+      onAppendImagesCard(hits);
       Notiflix.Notify.info(`Hooray! We found ${totalHits} images.`);
       refs.loadMoreBtn.classList.remove('is-hidden');
-      onAppendImagesCard(hits);
     });
   } catch (error) {
     Notiflix.Notify.warning('Sorry, there is a problem. Try later.');

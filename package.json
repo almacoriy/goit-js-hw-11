@@ -26,6 +26,7 @@
     "sass": "^1.32.8"
   },
   "dependencies": {
+    "infinite-scroll": "^4.0.1",
     "notiflix": "^3.2.2",
     "pixabay-api": "^1.0.4",
     "simplelightbox": "^2.10.1"
