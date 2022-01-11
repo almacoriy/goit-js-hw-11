@@ -1,26 +1,34 @@
-import hitsTpl from './templates/hits.hbs';
-import ImagesApiService from './js/img-service';
-import Notiflix from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
+import Notiflix from 'notiflix';
+import ImagesApiService from './js/img-service';
+import hitsTpl from './templates/hits.hbs';
+import LoadMoreBtn from './js/load-more-btn';
+import gallery from './css/gallery.css';
+// import InfiniteScroll from 'infinite-scroll';
 
-//===== Инициализация SimpleLightbox =====
-let lightbox = new SimpleLightbox('.gallery a', {
-  captionsData: 'alt',
-  captionDelay: 250,
-});
-
+const imagesApiService = new ImagesApiService();
+const loadMoreBtn = new LoadMoreBtn();
 const refs = {
   form: document.querySelector('#search-form'),
-  loadMoreBtn: document.querySelector('.load-more'),
   imageCard: document.querySelector('.gallery'),
   textInput: document.querySelector('input'),
+  // linkImage: document.querySelector('.photo-card__link'),
 };
-const imagesApiService = new ImagesApiService();
 
 refs.form.addEventListener('submit', onSearchForm);
-refs.loadMoreBtn.addEventListener('click', fetchHits);
-refs.loadMoreBtn.classList.add('is-hidden');
+// refs.linkImage.addEventListener('onclick');
+loadMoreBtn.refs.button.addEventListener('click', fetchHits);
+loadMoreBtn.hide();
+
+//===== SimpleLightbox =====
+let lightbox = new SimpleLightbox('.gallery a');
+
+//=====Infinite Scroll=====
+// const infScroll = new InfiniteScroll(elem, {
+//   path: '.pagination__next',
+//   history: false,
+// });
 
 //  Записываем общее кол-во полученных от бэкэнда изображений
 let label;
@@ -41,7 +49,7 @@ async function onSearchForm(e) {
     }
 
     imagesApiService.resetPage();
-    onClearImagesCard();
+    clearImagesCard();
     await fetchHits();
   } catch (error) {
     Notiflix.Notify.warning('Sorry, there is a problem. Try later.');
@@ -56,7 +64,7 @@ async function fetchHits() {
       label -= hits.length;
 
       //  Если бэкэнд ничего не вернул
-      if (totalHits === 0) {
+      if (hits.length === 0) {
         return Notiflix.Notify.failure(
           'Sorry, there are no images matching your search query. Please try again',
         );
@@ -69,9 +77,9 @@ async function fetchHits() {
         return Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
       }
       //  Рэндэрим  полученные изображения
-      onAppendImagesCard(hits);
       Notiflix.Notify.info(`Hooray! We found ${totalHits} images.`);
-      refs.loadMoreBtn.classList.remove('is-hidden');
+      appendImagesCard(hits);
+      loadMoreBtn.show();
     });
   } catch (error) {
     Notiflix.Notify.warning('Sorry, there is a problem. Try later.');
@@ -79,8 +87,9 @@ async function fetchHits() {
   }
 }
 
-function onAppendImagesCard(hits) {
+function appendImagesCard(hits) {
   refs.imageCard.insertAdjacentHTML('beforeend', hitsTpl(hits));
+  lightbox.refresh();
 
   //  Плавная прокрутка при отрисовке следующей группы изображений
   const { height: cardHeight } = refs.imageCard.firstElementChild.getBoundingClientRect();
@@ -91,6 +100,6 @@ function onAppendImagesCard(hits) {
   });
 }
 
-function onClearImagesCard() {
+function clearImagesCard() {
   refs.imageCard.innerHTML = '';
 }
