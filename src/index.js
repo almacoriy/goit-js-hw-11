@@ -5,7 +5,6 @@ import ImagesApiService from './js/img-service';
 import hitsTpl from './templates/hits.hbs';
 import LoadMoreBtn from './js/load-more-btn';
 import gallery from './css/gallery.css';
-// import InfiniteScroll from 'infinite-scroll';
 
 const imagesApiService = new ImagesApiService();
 const loadMoreBtn = new LoadMoreBtn();
@@ -13,36 +12,21 @@ const refs = {
   form: document.querySelector('#search-form'),
   imageCard: document.querySelector('.gallery'),
   textInput: document.querySelector('input'),
-  // linkImage: document.querySelector('.photo-card__link'),
 };
 
 refs.form.addEventListener('submit', onSearchForm);
-// refs.linkImage.addEventListener('onclick');
 loadMoreBtn.refs.button.addEventListener('click', fetchHits);
 loadMoreBtn.hide();
 
 //===== SimpleLightbox =====
 let lightbox = new SimpleLightbox('.gallery a');
 
-//=====Infinite Scroll=====
-// const infScroll = new InfiniteScroll(elem, {
-//   path: '.pagination__next',
-//   history: false,
-// });
-
-//  Записываем общее кол-во полученных от бэкэнда изображений
-let label;
-imagesApiService.fetchImages().then(({ totalHits }) => {
-  return (label = totalHits);
-});
-
 async function onSearchForm(e) {
   try {
     e.preventDefault();
 
     imagesApiService.searchQuery = e.currentTarget.elements.searchQuery.value;
-
-    if (imagesApiService.searchQuery === '') {
+    if (imagesApiService.searchQuery.trim() === '') {
       return Notiflix.Notify.failure(
         'Sorry, there are no images matching your search query. Please try again',
       );
@@ -53,37 +37,42 @@ async function onSearchForm(e) {
     await fetchHits();
   } catch (error) {
     Notiflix.Notify.warning('Sorry, there is a problem. Try later.');
-    console.log(error.stack);
+    console.log('Error', error.message);
   }
 }
 
 async function fetchHits() {
   try {
-    await imagesApiService.fetchImages().then(({ totalHits, hits }) => {
-      //  Считаем сколько полученных от бэкэнда изображений осталось вывести
-      label -= hits.length;
-
+    await imagesApiService.fetchImages().then(({ data, config }) => {
       //  Если бэкэнд ничего не вернул
-      if (hits.length === 0) {
+      if (data.hits.length === 0) {
         return Notiflix.Notify.failure(
           'Sorry, there are no images matching your search query. Please try again',
         );
       }
+
+      //  Выводим сообщение о кол-ве найденных изображений
+      if (config.params.page === 1) {
+        Notiflix.Notify.info(`Hooray! We found ${data.totalHits} images.`);
+      }
+
+      //  Рэндэрим  полученные изображения
+      appendImagesCard(data.hits);
+      loadMoreBtn.show();
+
       //  Если вывели все изображения, полученные от бэкэнда
-      if (label <= 0) {
-        refs.loadMoreBtn.classList.add('is-hidden');
+      const sumUploadedImages = config.params.per_page * config.params.page;
+
+      if (sumUploadedImages > data.totalHits) {
+        loadMoreBtn.hide();
         refs.textInput.value = '';
 
         return Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
       }
-      //  Рэндэрим  полученные изображения
-      Notiflix.Notify.info(`Hooray! We found ${totalHits} images.`);
-      appendImagesCard(hits);
-      loadMoreBtn.show();
     });
   } catch (error) {
     Notiflix.Notify.warning('Sorry, there is a problem. Try later.');
-    console.log(error.stack);
+    console.log('Error', error.message);
   }
 }
 

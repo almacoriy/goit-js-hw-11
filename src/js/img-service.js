@@ -24,7 +24,7 @@ export default class ImagesApiService {
     this.incrementPage();
     const response = await axios({ params });
 
-    return response.data;
+    return response;
   }
 
   incrementPage() {
