@@ -58,6 +58,11 @@ async function fetchHits() {
 
       //  Рэндэрим  полученные изображения
       appendImagesCard(data.hits);
+
+      if (config.params.page > 1) {
+        smoothScrolling();
+      }
+
       loadMoreBtn.show();
 
       //  Если вывели все изображения, полученные от бэкэнда
@@ -79,8 +84,13 @@ async function fetchHits() {
 function appendImagesCard(hits) {
   refs.imageCard.insertAdjacentHTML('beforeend', hitsTpl(hits));
   lightbox.refresh();
+}
 
-  //  Плавная прокрутка при отрисовке следующей группы изображений
+function clearImagesCard() {
+  refs.imageCard.innerHTML = '';
+}
+
+function smoothScrolling(params) {
   const { height: cardHeight } = refs.imageCard.firstElementChild.getBoundingClientRect();
 
   window.scrollBy({
@@ -89,6 +99,21 @@ function appendImagesCard(hits) {
   });
 }
 
-function clearImagesCard() {
-  refs.imageCard.innerHTML = '';
-}
+//==================================================================
+
+// console.log(loadMoreBtn.refs.button);
+
+// function enableIntersectionObserver() {
+//   const options = {
+//     root: loadMoreBtn.refs.button,
+//     threshold: 1,
+//   };
+//   const handleObserver = ([item]) => {
+//     if (item.isIntersecting && !isLoading && currentPage < maxPage) {
+//       loadMore();
+//     }
+//   };
+//   const observer = new IntersectionObserver(handleObserver, options);
+
+//   observer.observe(refs.loadMore);
+// }
