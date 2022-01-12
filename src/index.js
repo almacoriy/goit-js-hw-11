@@ -15,7 +15,7 @@ const refs = {
 };
 
 refs.form.addEventListener('submit', onSearchForm);
-loadMoreBtn.refs.button.addEventListener('click', fetchHits);
+loadMoreBtn.refs.button.addEventListener('click', onHandlingHits);
 loadMoreBtn.hide();
 
 //===== SimpleLightbox =====
@@ -34,14 +34,14 @@ async function onSearchForm(e) {
 
     imagesApiService.resetPage();
     clearImagesCard();
-    await fetchHits();
+    await onHandlingHits();
   } catch (error) {
     Notiflix.Notify.warning('Sorry, there is a problem. Try later.');
     console.log('Error', error.message);
   }
 }
 
-async function fetchHits() {
+async function onHandlingHits() {
   try {
     await imagesApiService.fetchImages().then(({ data, config }) => {
       //  Если бэкэнд ничего не вернул
@@ -90,7 +90,7 @@ function clearImagesCard() {
   refs.imageCard.innerHTML = '';
 }
 
-function smoothScrolling(params) {
+function smoothScrolling() {
   const { height: cardHeight } = refs.imageCard.firstElementChild.getBoundingClientRect();
 
   window.scrollBy({
