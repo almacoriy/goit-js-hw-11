@@ -21,24 +21,19 @@ loadMoreBtn.hide();
 //===== SimpleLightbox =====
 let lightbox = new SimpleLightbox('.gallery a');
 
-async function onSearchForm(e) {
-  try {
-    e.preventDefault();
+function onSearchForm(e) {
+  e.preventDefault();
 
-    imagesApiService.searchQuery = e.currentTarget.elements.searchQuery.value;
-    if (imagesApiService.searchQuery.trim() === '') {
-      return Notiflix.Notify.failure(
-        'Sorry, there are no images matching your search query. Please try again',
-      );
-    }
-
-    imagesApiService.resetPage();
-    clearImagesCard();
-    await onHandlingHits();
-  } catch (error) {
-    Notiflix.Notify.warning('Sorry, there is a problem. Try later.');
-    console.log('Error', error.message);
+  imagesApiService.searchQuery = e.currentTarget.elements.searchQuery.value;
+  if (imagesApiService.searchQuery.trim() === '') {
+    return Notiflix.Notify.failure(
+      'Sorry, there are no images matching your search query. Please try again',
+    );
   }
+
+  imagesApiService.resetPage();
+  clearImagesCard();
+  onHandlingHits();
 }
 
 async function onHandlingHits() {
