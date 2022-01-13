@@ -14,8 +14,51 @@ const refs = {
   textInput: document.querySelector('input'),
 };
 
+const handlingHits = async () => {
+  try {
+    const { data, config } = await imagesApiService.fetchImages();
+    const totalImages = data.totalHits; // Кол-во найденных изображений
+    const amountOfImages = data.hits.length; // Длина массива найденных изображений
+    const currentPageNumber = config.params.page; // Номер загруженной страницы
+    const amountUploadedImages = config.params.per_page; // Кол-во загружаемых за раз страниц
+    const sumUploadedImages = amountUploadedImages * currentPageNumber; // Сумма загруженных изображений
+
+    //  Если бэкэнд ничего не вернул
+    if (amountOfImages === 0) {
+      return Notiflix.Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again',
+      );
+    }
+
+    //  Выводим сообщение о кол-ве найденных изображений
+    if (currentPageNumber === 1) {
+      Notiflix.Notify.info(`Hooray! We found ${totalImages} images.`);
+    }
+
+    //  Рэндэрим  полученные изображения
+    appendImagesCard(data.hits);
+
+    if (currentPageNumber > 1) {
+      smoothScrolling();
+    }
+
+    loadMoreBtn.show();
+
+    //  Если вывели все изображения, полученные от бэкэнда
+    if (sumUploadedImages > totalImages) {
+      loadMoreBtn.hide();
+      refs.textInput.value = '';
+
+      return Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
+    }
+  } catch (error) {
+    Notiflix.Notify.warning('Sorry, there is a problem. Try later.');
+    console.log('Error', error.message);
+  }
+};
+
 refs.form.addEventListener('submit', onSearchForm);
-loadMoreBtn.refs.button.addEventListener('click', onHandlingHits);
+loadMoreBtn.refs.button.addEventListener('click', handlingHits);
 loadMoreBtn.hide();
 
 //===== SimpleLightbox =====
@@ -25,6 +68,7 @@ function onSearchForm(e) {
   e.preventDefault();
 
   imagesApiService.searchQuery = e.currentTarget.elements.searchQuery.value;
+
   if (imagesApiService.searchQuery.trim() === '') {
     return Notiflix.Notify.failure(
       'Sorry, there are no images matching your search query. Please try again',
@@ -33,47 +77,7 @@ function onSearchForm(e) {
 
   imagesApiService.resetPage();
   clearImagesCard();
-  onHandlingHits();
-}
-
-async function onHandlingHits() {
-  try {
-    await imagesApiService.fetchImages().then(({ data, config }) => {
-      //  Если бэкэнд ничего не вернул
-      if (data.hits.length === 0) {
-        return Notiflix.Notify.failure(
-          'Sorry, there are no images matching your search query. Please try again',
-        );
-      }
-
-      //  Выводим сообщение о кол-ве найденных изображений
-      if (config.params.page === 1) {
-        Notiflix.Notify.info(`Hooray! We found ${data.totalHits} images.`);
-      }
-
-      //  Рэндэрим  полученные изображения
-      appendImagesCard(data.hits);
-
-      if (config.params.page > 1) {
-        smoothScrolling();
-      }
-
-      loadMoreBtn.show();
-
-      //  Если вывели все изображения, полученные от бэкэнда
-      const sumUploadedImages = config.params.per_page * config.params.page;
-
-      if (sumUploadedImages > data.totalHits) {
-        loadMoreBtn.hide();
-        refs.textInput.value = '';
-
-        return Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
-      }
-    });
-  } catch (error) {
-    Notiflix.Notify.warning('Sorry, there is a problem. Try later.');
-    console.log('Error', error.message);
-  }
+  handlingHits();
 }
 
 function appendImagesCard(hits) {

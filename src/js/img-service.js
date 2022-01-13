@@ -13,7 +13,7 @@ export default class ImagesApiService {
   async fetchImages() {
     const params = {
       key: API_KEY,
-      q: this.searchForm,
+      q: this.searchQuery,
       per_page: 40,
       page: this.page,
       image_type: 'photo',
