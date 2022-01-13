@@ -97,22 +97,3 @@ function smoothScrolling() {
     behavior: 'smooth',
   });
 }
-
-//==================================================================
-
-// console.log(loadMoreBtn.refs.button);
-
-// function enableIntersectionObserver() {
-//   const options = {
-//     root: loadMoreBtn.refs.button,
-//     threshold: 1,
-//   };
-//   const handleObserver = ([item]) => {
-//     if (item.isIntersecting && !isLoading && currentPage < maxPage) {
-//       loadMore();
-//     }
-//   };
-//   const observer = new IntersectionObserver(handleObserver, options);
-
-//   observer.observe(refs.loadMore);
-// }
