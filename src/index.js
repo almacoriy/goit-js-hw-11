@@ -16,6 +16,8 @@ const refs = {
 
 const handlingHits = async () => {
   try {
+    loadMoreBtn.hide();
+
     const { data, config } = await imagesApiService.fetchImages();
     const totalImages = data.totalHits; // Кол-во найденных изображений
     const amountOfImages = data.hits.length; // Длина массива найденных изображений
@@ -41,7 +43,6 @@ const handlingHits = async () => {
     if (currentPageNumber > 1) {
       smoothScrolling();
     }
-
     loadMoreBtn.show();
 
     //  Если вывели все изображения, полученные от бэкэнда
